@@ -100,6 +100,12 @@ describe BinaryGame do
 
     subject(:game_input) { described_class.new(1, 10) }
 
+    before do
+      @min = game_input.instance_variable_get(:@minimum)
+      @max = game_input.instance_variable_get(:@maximum)
+      @error_message = "Input error! Please enter a number between #{@min} or #{@max}."
+    end
+
     context 'when user number is between arguments' do
       before do
         valid_input = '3'
@@ -111,11 +117,8 @@ describe BinaryGame do
       # https://www.rubydoc.info/stdlib/core/2.0.0/Object:instance_variable_get
 
       it 'stops loop and does not display error message' do
-        min = game_input.instance_variable_get(:@minimum)
-        max = game_input.instance_variable_get(:@maximum)
-        error_message = "Input error! Please enter a number between #{min} or #{max}."
-        expect(game_input).not_to receive(:puts).with(error_message)
-        game_input.player_input(min, max)
+        expect(game_input).not_to receive(:puts).with(@error_message)
+        game_input.player_input(@min, @max)
       end
     end
 
@@ -130,17 +133,30 @@ describe BinaryGame do
 
     context 'when user inputs an incorrect value once, then a valid input' do
       before do
+        invalid_input = 'oi mate'
+        valid_input = '5'
+        allow(game_input).to receive(:gets).and_return(invalid_input, valid_input)
       end
 
-      xit 'completes loop and displays error message once' do
+      it 'completes loop and displays error message once' do
+        expect(game_input).to receive(:puts).with(@error_message)
+        expect(game_input).not_to receive(:puts).with(@error_message)
+        game_input.player_input(@min, @max)
       end
     end
 
     context 'when user inputs two incorrect values, then a valid input' do
       before do
+        invalid_phrase = 'oi mate'
+        invalid_input = '$'
+        valid_input = '8'
+        allow(game_input).to receive(:gets).and_return(invalid_phrase, invalid_input, valid_input)
       end
 
-      xit 'completes loop and displays error message twice' do
+      it 'completes loop and displays error message twice' do
+        expect(game_input).to receive(:puts).with(@error_message).twice
+        expect(game_input).not_to receive(:puts).with(@error_message)
+        game_input.player_input(@min, @max)
       end
     end
   end
